@@ -14,6 +14,21 @@ static char THIS_FILE[] = __FILE__;
 //CNmcDevice* g_pNmcDevice = NULL;
 //void _thread_ListMotionRun(LPVOID pArg);
 
+
+#ifdef _WIN64
+//#include "NMC_Motion.h"
+#pragma comment (lib, "Device/NMC/x64/NMC_Motion.lib")
+#pragma comment (lib, "Device/NMC/x64/NMC_APP_Motion.lib")
+//#pragma comment (lib, "lib/NMC_Comm.lib")
+//#pragma comment (lib, "lib/NMC_Driver.lib")
+#else
+//#include "Device/MMCE/x86/NMC_Motion.h"
+#pragma comment (lib, "Device/NMC/x86/NMC_Motion.lib")
+//#pragma comment (lib, "Device/NMC/x86/NMC_Comm.lib")
+//#pragma comment (lib, "Device/NMC/x86/NMC_Driver.lib")
+#endif
+
+
 /////////////////////////////////////////////////////////////////////////////
 // CNmcDevice
 

@@ -14,6 +14,8 @@
 
 #pragma warning(disable: 4091)
 
+//#define FLAMENCOMOTIONAPI_EXPORTS
+
 #ifdef FLAMENCOMOTIONAPI_EXPORTS
 #define NMCMOTIONAPI __declspec(dllexport)
 #else

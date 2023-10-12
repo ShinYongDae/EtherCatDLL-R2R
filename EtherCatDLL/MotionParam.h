@@ -9,65 +9,6 @@
 
 
 
-#ifdef USE_ZMP
-
-
-#include "stdmpi.h"
-#include "apputil.h"
-#include "firmware.h"
-#include "MFWPTR.h"
-
-
-
-#ifdef _DEBUG
-#pragma comment(lib, "mpi64vc100d.lib")
-#else
-#pragma comment(lib, "mpi64vc100.lib")
-#endif
-
-#pragma comment(lib, "mpiAppLib64.lib")
-#pragma comment(lib, "sqNodeLib64.lib")
-#pragma comment(lib, "apputil64.lib")
-
-
-
-
-typedef enum stSpeedProfile { TRAPEZOIDAL = 0, S_CURVE, PARABOLIC } SpeedProfile;
-
-
-typedef enum CMotionType {
-	MotionTypeINVALID = MPIMotionTypeINVALID,
-	MotionTypePT = MPIMotionTypePT,
-	MotionTypePTF = MPIMotionTypePTF,
-	MotionTypePVT = MPIMotionTypePVT,
-	MotionTypePVTF = MPIMotionTypePVTF,
-	MotionTypeSPLINE = MPIMotionTypeSPLINE,
-	MotionTypeBESSEL = MPIMotionTypeBESSEL,
-	MotionTypeBSPLINE = MPIMotionTypeBSPLINE,
-	MotionTypeBSPLINE2 = MPIMotionTypeBSPLINE2,
-	MotionTypeS_CURVE = MPIMotionTypeS_CURVE_JERK_PERCENT,
-	MotionTypeTRAPEZOIDAL = MPIMotionTypeTRAPEZOIDAL,
-	MotionTypeS_CURVE_JERK = MPIMotionTypeS_CURVE_JERK,
-	MotionTypeVELOCITY = MPIMotionTypeVELOCITY_JERK_PERCENT,
-	MotionTypeVELOCITY_JERK = MPIMotionTypeVELOCITY_JERK,
-	MotionTypeCAM_LINEAR = MPIMotionTypeCAM_LINEAR,
-	MotionTypeCAM_CUBIC = MPIMotionTypeCAM_CUBIC,
-	MotionTypeFRAME = MPIMotionTypeFRAME,
-	MotionTypeUSER = MPIMotionTypeUSER,
-	MotionTypeEND = MPIMotionTypeEND,
-	MotionTypeFIRST = MPIMotionTypeFIRST,
-	MotionTypeLAST,
-	MotionTypeMASK
-} MotionType;
-
-
-#endif
-
-
-
-
-
-
 typedef struct stMotionHome
 {
 	BOOL	bIndex;

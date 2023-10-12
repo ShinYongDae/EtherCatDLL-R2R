@@ -1,22 +1,23 @@
 #pragma once
 
+#define USE_NMC
+
 #include "MotionParam.h"
 #include "MyFileErrMap.h"
-#include "NmcDevice.h"
 
-//#define COEFFICIENTS		10
-//
-//typedef enum { SERVO = 0, STEP } MOTOR_TYPE;
-//typedef enum { TRAPEZOIDAL = 0, S_CURVE, PARABOLIC } SpeedProfile;
-//typedef enum { LOW_SPEED = 0, MIDDLE_SPEED = 1, HIGH_SPEED = 2 } enMotionSpeed;
-//typedef enum { MINUS = -1, PLUS = 1 } Direction;
-//typedef enum { PREVIOUS = -1, STOPED = 0, NEXT = 1, SPECIFIED = 2 } enMotionStatus;
+#ifdef USE_NMC
+#include "NmcDevice.h"
+#else
+#include "NMC_R2R.h"
+#endif
+
+
 
 #define PATH_MOTION_PARAM		_T("MotionParam.ini")
 #define MAX_AXIS 4
 typedef enum { M_CCW = -1, M_CW = 1 } MOTION_DIR;
 
-AFX_EXT_CLASS class CEtherCat : public CWnd
+class AFX_EXT_CLASS CEtherCat : public CWnd
 {
 	CWnd* m_pParent;
 	UINT16	m_nBoardId;
@@ -25,14 +26,14 @@ AFX_EXT_CLASS class CEtherCat : public CWnd
 	INT		m_nOffsetAxisID;
 	int		m_nGroupID_Interpolation[2];
 
+#ifdef USE_NMC
 	CNmcDevice *m_pMotionCard;
+#endif
+
 	DWORD m_dwSt, m_dwEd;
 	double m_dStMsLsrOffsetX, m_dStMsLsrOffsetY, m_dEdMsLsrOffsetX, m_dEdMsLsrOffsetY;
 
 	void FreeAll();
-	void LoadParam();
-	BOOL LoadErrMapFile(CString sPath);
-	BOOL InitNmcBoard();
 	void SetConfigure();
 	void SetMotionParam();
 	BOOL CreateObject();
@@ -75,13 +76,17 @@ public:
 
 	// Operations
 public:
+	BOOL InitBoard();
+	BOOL ConnectNmcBoard();
+
+	void LoadParam(CString sPath);
+	BOOL LoadErrMapFile(CString sPath);
 	double GetMotionTime(double dLen, double dVel, double dAcc, double dJerk);
 	double GetSCurveVelocity(double dLen, double &dVel, double &dAcc, double &dJerk, double dMinJerkTime);
 	double GetSpeedProfile(int nMode, int nAxisID, double fMovingLength, double &fVel, double &fAcc, double &fJerk, int nSpeedType = HIGH_SPEED);
 
 	BOOL Abort(int nMotionId);
 	long GetState(int nMotionId);
-	BOOL InitBoard();
 	BOOL SearchHome();
 	BOOL SearchHomePos(int nMotionId, BOOL bThread = TRUE);
 	BOOL IsHome(int nMotionId);

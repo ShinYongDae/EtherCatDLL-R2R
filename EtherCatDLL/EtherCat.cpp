@@ -12,6 +12,7 @@
 
 CEtherCat::CEtherCat(CWnd* pParent)
 {
+	//AfxMessageBox(_T("at CEtherCat"));
 	int i = 0;
 
 	UINT16 nBoardID = NMC_DEVICE_BOARD;
@@ -27,8 +28,9 @@ CEtherCat::CEtherCat(CWnd* pParent)
 
 	m_pParent = pParent;
 	m_pParam = NULL;
-
+#ifdef USE_NMC
 	m_pMotionCard = NULL;
+#endif
 
 	m_pParamMotion = NULL;
 	m_pParamAxis = NULL;
@@ -84,7 +86,7 @@ CEtherCat::CEtherCat(CWnd* pParent)
 		AfxMessageBox(_T("CEtherCat::Create() Failed!!!"));
 
 	m_sPathMotionParam = PATH_MOTION_PARAM;
-	LoadParam();
+	//LoadParam();
 }
 
 CEtherCat::~CEtherCat()
@@ -114,11 +116,13 @@ void CEtherCat::FreeAll()
 		delete m_pMyFileErrMap;
 		m_pMyFileErrMap = NULL;
 	}
+#ifdef USE_NMC
 	if (m_pMotionCard)
 	{
 		delete m_pMotionCard;
 		m_pMotionCard = NULL;
 	}
+#endif
 	if (m_pParamMotor)
 	{
 		delete[] m_pParamMotor;
@@ -151,7 +155,7 @@ BOOL CEtherCat::LoadErrMapFile(CString sPath)
 	return TRUE;
 }
 
-void CEtherCat::LoadParam()
+void CEtherCat::LoadParam(CString sPath)
 {
 	//CMainFrame *pFrame = (CMainFrame *)AfxGetMainWnd();
 	//CGvisR2R_PunchView *pView = (CGvisR2R_PunchView *)pFrame->GetActiveView();
@@ -167,28 +171,28 @@ void CEtherCat::LoadParam()
 
 
 	// [CONTROL PARAM]
-	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL MOTION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL MOTION"), NULL, szData, sizeof(szData), sPath))
 		m_ParamCtrl.nTotMotion = _ttoi(szData);
 	else
 		m_ParamCtrl.nTotMotion = 0;
-	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL AXIS"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL AXIS"), NULL, szData, sizeof(szData), sPath))
 		m_ParamCtrl.nTotAxis = _ttoi(szData);
 	else
 		m_ParamCtrl.nTotAxis = 0;
 	m_nTotAxis = m_ParamCtrl.nTotAxis;
-	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL MOTOR"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL MOTOR"), NULL, szData, sizeof(szData), sPath))
 		m_ParamCtrl.nTotMotor = _ttoi(szData);
 	else
 		m_ParamCtrl.nTotMotor = 0;
-	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL FILTER"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL FILTER"), NULL, szData, sizeof(szData), sPath))
 		m_ParamCtrl.nTotFilter = _ttoi(szData);
 	else
 		m_ParamCtrl.nTotFilter = 0;
-	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL CAPTURE"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL CAPTURE"), NULL, szData, sizeof(szData), sPath))
 		m_ParamCtrl.nTotCapture = _ttoi(szData);
 	else
 		m_ParamCtrl.nTotCapture = 0;
-	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL SEQUENCE"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("CONTROL PARAM"), _T("TOTAL SEQUENCE"), NULL, szData, sizeof(szData), sPath))
 		m_ParamCtrl.nTotSequence = _ttoi(szData);
 	else
 		m_ParamCtrl.nTotSequence = 0;
@@ -207,7 +211,7 @@ void CEtherCat::LoadParam()
 	for (nID = 0; nID < m_ParamCtrl.nTotAxis; nID++)
 	{
 		sIdx.Format(_T("AXIS%d"), nID);
-		if (0 < ::GetPrivateProfileString(_T("OBJECT MAPPING"), sIdx, NULL, szData, sizeof(szData), m_sPathMotionParam))
+		if (0 < ::GetPrivateProfileString(_T("OBJECT MAPPING"), sIdx, NULL, szData, sizeof(szData), sPath))
 		{
 			token = _tcstok(szData, sep);
 			nCol = 0;
@@ -232,7 +236,7 @@ void CEtherCat::LoadParam()
 	for (nID = 0; nID < m_ParamCtrl.nTotMotion; nID++)
 	{
 		sIdx.Format(_T("MS%d"), nID);
-		if (0 < ::GetPrivateProfileString(_T("OBJECT MAPPING"), sIdx, NULL, szData, sizeof(szData), m_sPathMotionParam))
+		if (0 < ::GetPrivateProfileString(_T("OBJECT MAPPING"), sIdx, NULL, szData, sizeof(szData), sPath))
 		{
 			token = _tcstok(szData, sep);
 			nCol = 0;
@@ -267,7 +271,7 @@ void CEtherCat::LoadParam()
 
 
 	// [AXIS PARAM]
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("AXIS NAME"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("AXIS NAME"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -287,7 +291,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamAxis[nID].sName = _T(""); // Axis Name
 
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -307,7 +311,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamAxis[nID].fSpd = 0.0; // [mm/s]
 
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -327,7 +331,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamAxis[nID].fAcc = 0.0; // [G]=9.8*10^6[m/s^2]
 
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("DECELERATION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("DECELERATION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -347,7 +351,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamAxis[nID].fDec = 0.0; // [G]=9.8*10^6[m/s^2]
 
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("ACCELERATION PERIOD"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("ACCELERATION PERIOD"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -367,7 +371,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamAxis[nID].fAccPeriod = 0.0;
 
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("MAX ACCELERATION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("MAX ACCELERATION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -387,7 +391,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamAxis[nID].fMaxAccel = 0.0; // [G]=9.8*10^6[m/s^2]
 
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("MIN JERK TIME"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("MIN JERK TIME"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -407,7 +411,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamAxis[nID].fMinJerkTime = 0.0; // [sec]
 
-	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("INPOSITION LENGTH"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("AXIS PARAM"), _T("INPOSITION LENGTH"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -429,7 +433,7 @@ void CEtherCat::LoadParam()
 
 
 											// [MOTOR PARAM]
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("MOTOR TYPE"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("MOTOR TYPE"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -449,7 +453,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].bType = 1; // 0: Servo Motor, 1: Step Motor
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("MOTOR RATING SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("MOTOR RATING SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -469,7 +473,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].fRatingSpeed = 0.0; // 0: Servo Motor, 1: Step Motor
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("MOTOR DIRECTION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("MOTOR DIRECTION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -489,7 +493,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].nDir = 1; // -1: CCW, 1: CW
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("FEEDBACK SOURCE"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("FEEDBACK SOURCE"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -509,7 +513,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].bEncoder = 0; // 1: External Encoder 0: Internal Pulse Out
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("ENCODER PULSE"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("ENCODER PULSE"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -529,7 +533,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].nEncPulse = 0; // [pulse/rev]
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("LEAD PITCH"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("LEAD PITCH"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -549,7 +553,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].fLeadPitch = 0.0; // Ball Screw Lead Pitch [mm]
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("ENCODER MULTIPLIER"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("ENCODER MULTIPLIER"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -569,7 +573,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].nEncMul = 0; // Encoder Multiplier
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("GEAR RATIO"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("GEAR RATIO"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -589,7 +593,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].fGearRatio = 0.0; // Gear Ratio
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("AMP ENABLE LEVEL"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("AMP ENABLE LEVEL"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -609,7 +613,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].bAmpEnableLevel = 1; // Amp Enable Level 0: Low Active 1: High Active
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("AMP FAULT LEVEL"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("AMP FAULT LEVEL"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -629,7 +633,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].bAmpFaultLevel = 1; // Amp Fault Level 0: Low Active 1: High Active
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("POS LIMIT SENSOR LEVEL"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("POS LIMIT SENSOR LEVEL"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -649,7 +653,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].bPosLimitLevel = 1; // Positive Limit sensor active Level 0: Low Active 1: High Active
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("NEG LIMIT SENSOR LEVEL"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("NEG LIMIT SENSOR LEVEL"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -669,7 +673,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].bNegLimitLevel = 1; // Negative Limit sensor active Level 0: Low Active 1: High Active
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("HOME SENSOR LEVEL"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("HOME SENSOR LEVEL"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -689,7 +693,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].bHomeLevel = 1; // Home sensor active Level 0: Low Active 1: High Active
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("POSITIVE SOFTWARE LIMIT"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("POSITIVE SOFTWARE LIMIT"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -709,7 +713,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotor[nID].fPosLimit = 0.0; // Sotftware positive motion limit
 
-	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("NEGATIVE SOFTWARE LIMIT"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTOR PARAM"), _T("NEGATIVE SOFTWARE LIMIT"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -731,7 +735,7 @@ void CEtherCat::LoadParam()
 
 
 											// [MOTION PARAM]
-	if (0 < ::GetPrivateProfileString(_T("MOTION PARAM"), _T("ESTOP TIME"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("MOTION PARAM"), _T("ESTOP TIME"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -752,7 +756,7 @@ void CEtherCat::LoadParam()
 		m_pParamMotion[nID].dEStopTime = 0.1; // [Sec]
 
 											  // [HOME PARAM]
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("ACTION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("ACTION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -772,7 +776,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Home.bAct = 0; // 0: Don't 1:Do
 
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("SEARCH DIRECTION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("SEARCH DIRECTION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -792,7 +796,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Home.nDir = -1; // -1: Minus 1:Plus
 
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("ESCAPE LENGTH"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("ESCAPE LENGTH"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -812,7 +816,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Home.fEscLen = 0.0; // Escape length from home sensor touch position
 
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("1'st SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("1'st SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -832,7 +836,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Home.f1stSpd = 0.0; // [mm/s] or [deg/s^2] Fast speed for home search 
 
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("2'nd SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("2'nd SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -852,7 +856,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Home.f2ndSpd = 0.0; // [mm/s] or [deg/s^2] Fast speed for home search 
 
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -872,7 +876,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Home.fAcc = 0.0; // [mm/s^2] or [deg/s^2]
 
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("SHIFT"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("SHIFT"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -892,7 +896,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Home.fShift = 0.0; // [mm]
 
-	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("OFFSET"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("HOME PARAM"), _T("OFFSET"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -914,7 +918,7 @@ void CEtherCat::LoadParam()
 
 
 												// [SPEED PARAM]
-	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -934,7 +938,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Speed.fSpd = 0.0; // [mm/s]
 
-	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -954,7 +958,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Speed.fAcc = 0.0; // [G]=9.8*10^6[m/s^2]
 
-	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("DECELERATION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("DECELERATION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -974,7 +978,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Speed.fDec = 0.0; // [G]=9.8*10^6[m/s^2]
 
-	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("ACCELERATION PERIOD"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("SPEED PARAM"), _T("ACCELERATION PERIOD"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -996,7 +1000,7 @@ void CEtherCat::LoadParam()
 
 
 													// [JOG PARAM]
-	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("FAST SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("FAST SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -1016,7 +1020,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Speed.fJogFastSpd = 0.0; // [mm/s] or [deg/s^2] Fast speed
 
-	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("MIDDLE SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("MIDDLE SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -1036,7 +1040,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Speed.fJogMidSpd = 0.0; // [mm/s] or [deg/s^2] Middle speed
 
-	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("LOW SPEED"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("LOW SPEED"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -1056,7 +1060,7 @@ void CEtherCat::LoadParam()
 	else
 		m_pParamMotion[nID].Speed.fJogLowSpd = 0.0; // [mm/s] or [deg/s^2] Middle speed
 
-	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), m_sPathMotionParam))
+	if (0 < ::GetPrivateProfileString(_T("JOG PARAM"), _T("ACCELERATION"), NULL, szData, sizeof(szData), sPath))
 	{
 		token = _tcstok(szData, sep);
 		nID = 0;
@@ -1079,9 +1083,9 @@ void CEtherCat::LoadParam()
 
 BOOL CEtherCat::InitBoard()
 {
+#ifdef USE_NMC
 	if (!m_pMotionCard)
 	{
-		//m_pMotionCard = new CXmpControl(m_pMyFileErrMap, this);
 		m_pMotionCard = new CNmcDevice(this);
 		if (!m_pMotionCard)
 		{
@@ -1089,12 +1093,13 @@ BOOL CEtherCat::InitBoard()
 			return FALSE;
 		}
 	}
-	return InitNmcBoard();
+#endif
 	return TRUE;
 }
 
-BOOL CEtherCat::InitNmcBoard()
+BOOL CEtherCat::ConnectNmcBoard()
 {
+#ifdef USE_NMC
 	if (!m_pMotionCard)
 	{
 
@@ -1102,7 +1107,6 @@ BOOL CEtherCat::InitNmcBoard()
 
 		if (!m_pMotionCard)
 		{
-			//delete m_pMotionCard;
 			return FALSE;
 		}
 
@@ -1129,23 +1133,25 @@ BOOL CEtherCat::InitNmcBoard()
 		//Sleep(100);
 		m_pMotionCard->RestoreSwEmergency();	// -1: Fault , 1: Emergency Signal Off complete, 2: Previous Emergency Signal Off-state, 3: Normal
 	}
-
+#endif
 	return TRUE;
 }
 
 BOOL CEtherCat::CreateObject()
 {
+#ifdef USE_NMC
 	for (int nAxis = 0; nAxis < m_nTotAxis; nAxis++)
 	{
 		if (m_pMotionCard)
 			m_pMotionCard->CreateAxis(nAxis);
 	}
+#endif
 	return TRUE;
 }
 
 BOOL CEtherCat::ReadBit(BYTE cBit, BOOL bInput)
 {
-	//return (m_pMotionCard->ReadBit(cBit, bInput));
+#ifdef USE_NMC
 	if (bInput)
 	{
 		return m_pMotionCard->ReadIn((long)cBit);
@@ -1154,14 +1160,13 @@ BOOL CEtherCat::ReadBit(BYTE cBit, BOOL bInput)
 	{
 		return m_pMotionCard->ReadOut((long)cBit);
 	}
-
+#endif
 	return FALSE;
 }
 
 unsigned long CEtherCat::ReadAllBit(BOOL bInput)
 {
-	//return (m_pMotionCard->ReadAllBit(bInput));
-
+#ifdef USE_NMC
 	long nData;
 
 	if (bInput)
@@ -1174,48 +1179,61 @@ unsigned long CEtherCat::ReadAllBit(BOOL bInput)
 		nData = m_pMotionCard->ReadOut();
 		return ((unsigned long)nData);
 	}
-
+#endif
 	return 0L;
 }
 
 void CEtherCat::WriteData(long lData)
 {
+#ifdef USE_NMC
 	m_pMotionCard->Out32(lData);
+#endif
 }
 
 void CEtherCat::WriteBit(BYTE cBit, BOOL bOn)
 {
+#ifdef USE_NMC
 	m_pMotionCard->OutBit((long)cBit, bOn);
+#endif
 }
 
 void CEtherCat::SetConfigure()
 {
+#ifdef USE_NMC
 	if (!m_pMotionCard)
 		return;
 
 	m_pMotionCard->SetConfigure(m_nBoardId, m_nDevIdIoIn, m_nDevIdIoOut, m_nOffsetAxisID);
+#endif
 	SetMotionParam();
 }
 
 void CEtherCat::SetMotionParam()
 {
+#ifdef USE_NMC
 	if (m_pMotionCard)
 		m_pMotionCard->SetParam();
+#endif
 }
 
 BOOL CEtherCat::AmpReset(int nMsId)
 {
+#ifdef USE_NMC
 	return m_pMotionCard->GetAxis(nMsId)->AmpFaultReset();
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::ServoOnOff(int nAxisId, BOOL bOnOff)
 {
+#ifdef USE_NMC
 	return m_pMotionCard->GetAxis(nAxisId)->SetAmpEnable(bOnOff);
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::SearchHome()
 {
-	//	for(int nMsID=0; nMsID<1; nMsID++)
 	for (int nMsID = 0; nMsID < m_ParamCtrl.nTotMotion; nMsID++)
 	{
 		SearchHomePos(nMsID);
@@ -1229,113 +1247,180 @@ BOOL CEtherCat::SearchHomePos(int nMotionId, BOOL bThread)
 
 	if (!m_pParamMotion[nMotionId].Home.bAct)
 		return TRUE;
+#ifdef USE_NMC
 	if (!m_pMotionCard->SearchHomePos(nMotionId, bThread))
 		return FALSE;
+#endif
 	return TRUE;
 }
 
 BOOL CEtherCat::IsHome(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsHome(nMotionId));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::IsHomeDone()
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsHomeDone());
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::IsHomeDone(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsHomeDone(nMotionId));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::SetVMove(int nMotionId, double fVel, double fAcc)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->SetVMove(nMotionId, fVel, fAcc));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::VMove(int nMotionId, int nDir)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->VMove(nMotionId, nDir));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::Move(int nMotionId, double *pTgtPos, BOOL bAbs, BOOL bWait)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->Move(nMotionId, pTgtPos, bAbs, bWait));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::Move(int nMotionId, double *pTgtPos, double dRatio, BOOL bAbs, BOOL bWait)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->Move(nMotionId, pTgtPos, dRatio, bAbs, bWait));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::Move(int nMotionId, double *pTgtPos, double dSpd, double dAcc, double dDec, BOOL bAbs, BOOL bWait)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->Move(nMotionId, pTgtPos, dSpd, dAcc, dDec, bAbs, bWait));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::Move(int nMotionId, double dTgtPos, double dSpd, double dAcc, double dDec, BOOL bAbs, BOOL bWait)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->Move(nMotionId, dTgtPos, dSpd, dAcc, dDec, bAbs, bWait));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::IsMotionDone(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsMotionDone(nMotionId));
+#endif
+	return TRUE;
 }
 
 BOOL CEtherCat::IsInPosition(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsInPosition(nMotionId));
+#endif
+	return TRUE;
 }
 
 double CEtherCat::GetActualPosition(int nAxisId)
 {
 	double dPos = -10000.0;
+#ifdef USE_NMC
 	dPos = m_pMotionCard->GetActualPosition(nAxisId);
+#endif
 	return(dPos);
 }
 
 double CEtherCat::GetActualVelocity(int nAxisId)
 {
 	double dVel = 0.0;
+#ifdef USE_NMC
 	dVel = m_pMotionCard->GetActualVelocity(nAxisId);
+#endif
 	return(dVel);
 }
 
 BOOL CEtherCat::Stop(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->Stop(nMotionId));
+#endif
+	return TRUE;
+
 }
 
 BOOL CEtherCat::EStop(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->EStop(nMotionId));
+#endif
+	return TRUE;
+
 }
 
 BOOL CEtherCat::VMoveStop(int nMotionId, int nDir)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->VMoveStop(nMotionId, nDir));
+#endif
+	return TRUE;
+
 }
 
 BOOL CEtherCat::IsLimit(int nMotionId, int nDir)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsLimit(nMotionId, nDir));
+#endif
+	return TRUE;
+
 }
 
 BOOL CEtherCat::Clear(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->Clear(nMotionId));
+#endif
+	return TRUE;
+
 }
 
 long CEtherCat::GetState(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->GetState(nMotionId));
+#endif
+	return TRUE;
+
 }
 
 BOOL CEtherCat::Abort(int nMotionId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->Abort(nMotionId));
+#endif
+	return TRUE;
+
 }
 
 double CEtherCat::GetSpeedProfile(int nMode, int nAxisID, double fLength, double &fVel, double &fAcc, double &fJerk, int nSpeedType)
@@ -1490,12 +1575,20 @@ double CEtherCat::GetLeadPitch(int nAxisId)
 
 BOOL CEtherCat::IsEnable(int nMsId)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsEnable(nMsId));
+#endif
+	return TRUE;
+
 }
 
 BOOL CEtherCat::IsServoOn(int nMotorID)
 {
+#ifdef USE_NMC
 	return (m_pMotionCard->IsServoOn(nMotorID));
+#endif
+	return TRUE;
+
 }
 
 void CEtherCat::MotionAbortAll()
